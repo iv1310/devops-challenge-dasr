@@ -47,10 +47,9 @@ jobs:
         working-directory: ./${{ env.IMAGE_API_NAME }}
       - name: Upload Test Result
         uses: actions/upload-artifact@v4
-        working-directory: ./${{ env.IMAGE_API_NAME }}
         if: steps.go-check.outputs.changed == 'true'
         with:
-          name: Go-results-1.21
+          name: ./{{ env/IMAGE_API_NAME }}/Go-results-1.21
           path: TestResult-1.21.json
       - name: Setup Node v18
         uses: actions/setup-node@v4
