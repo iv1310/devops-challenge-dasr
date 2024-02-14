@@ -10,7 +10,7 @@ env:
 
 jobs:
   test-build-and-unit-test:
-    name: [Test] Build and Unit Test
+    name: Build and Unit Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -67,7 +67,7 @@ jobs:
         working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
 
   # sonarqube-check:
-  #   name: [Test] Sonarqube Scan
+  #   name: Sonarqube Scan
   #   runs-on: ubuntu-latest
   #   steps:
   #     - uses: marceloprado/has-changed-path@v1.0.1
@@ -94,7 +94,7 @@ jobs:
   #         projectBaseDir: ${{ env.IMAGE_NAME }}
 
   test-build-docker:
-    name: [Test] Build docker image
+    name: Build docker image
     runs-on: ubuntu-latest
     steps:
       - uses: marceloprado/has-changed-path@v1.0.1
