@@ -1,29 +1,18 @@
 # Stage 1: Build and test the Angular application
-FROM node:18-alpine3.16 as dependencies
+FROM node:18-alpine3.16 as builder
 
 WORKDIR /app
 
-COPY my-spa-uwu/package.json my-spa-uwu/package-lock.json ./
+COPY my-notes-app-uwu/package*.json ./
+
 RUN npm install
 
-
-# Stage 2: Run additional tests or perform other tasks if needed
-FROM dependencies as builder
-
-COPY ./my-spa-uwu .
-RUN sed -i "s|<API_URL>|http://my-api-uwu.detectionserver.site:8080|g" src/app/app.component.ts
-RUN npm run build --prod
-
-# Stage 3: Create a smaller image for running the application
-FROM nginx:alpine
+# Stage 2: Create a smaller image for running the application
+FROM gcr.io/distroless/nodejs18-debian11:non-root
 
 # Copy the built Angular app from the builder stage
-COPY --from=builder /app/dist/application/browser /usr/share/nginx/html
+COPY --from=builder /app /app
 
-# Remove the default Nginx configuration and replace with custom configuration
-RUN rm -rf /etc/nginx/conf.d
-COPY my-spa-uwu/nginx.conf /etc/nginx/conf.d/
+WORKDIR /app
 
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["hello.js"]
