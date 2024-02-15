@@ -14,50 +14,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: tj-actions/changed-files@v42.0.2
+      - uses: dorny/paths-filter@v3
         name: Check go changes
         id: go-check
         with:
-          path: my-api-uwu
-      - uses: tj-actions/changed-files@v42.0.2
+          filters: |
+            src:
+              - 'my-api-uwu/**'
+      - uses: dorny/paths-filter@v3
         name: Check node changes
         id: node-check
         with:
-          path: my-spa-uwu
+          filters: |
+            src:
+              - 'my-spa-uwu/**'
       - name: Setup Go v1.21
         uses: actions/setup-go@v4
-        if: steps.go-check.outputs.any_changed == 'true'
+        if: steps.go-check.outputs.src == 'true'
         with:
           go-version: '1.21.x'
       - name: Install dependencies
-        if: steps.go-check.outputs.any_changed == 'true'
+        if: steps.go-check.outputs.src == 'true'
         run: go get .
         working-directory: ./${{ env.IMAGE_API_NAME }}
       - name: Test Build
-        if: steps.go-check.outputs.any_changed == 'true'
+        if: steps.go-check.outputs.src == 'true'
         run: go build -v .
         working-directory: ./${{ env.IMAGE_API_NAME }}
       - name: Run Unit test
-        if: steps.go-check.outputs.any_changed == 'true'
+        if: steps.go-check.outputs.src == 'true'
         run: go test -json > TestResult-1.21.json
         working-directory: ./${{ env.IMAGE_API_NAME }}
       - name: Upload Test Result
         uses: actions/upload-artifact@v4
-        if: steps.go-check.outputs.any_changed == 'true'
+        if: steps.go-check.outputs.src == 'true'
         with:
           name: ./{{ env/IMAGE_API_NAME }}/Go-results-1.21
           path: TestResult-1.21.json
       - name: Setup Node v18
         uses: actions/setup-node@v4
-        if: steps.node-check.outputs.any_changed == 'true'
+        if: steps.node-check.outputs.src == 'true'
         with:
           node-version: '18'
       - name: Install dependencies
-        if: steps.node-check.outputs.any_changed == 'true'
+        if: steps.node-check.outputs.src == 'true'
         run: npm install
         working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
       - name: Test Build
-        if: steps.node-check.outputs.any_changed == 'true'
+        if: steps.node-check.outputs.src == 'true'
         run: npm run build --prod
         working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
 
@@ -92,16 +96,20 @@ jobs:
     name: Build docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: tj-actions/changed-files@v42.0.2
+      - uses: dorny/paths-filter@v3
         name: Check go changes
         id: go-check
         with:
-          path: my-api-uwu
-      - uses: tj-actions/changed-files@v42.0.2
+          filters: |
+            src:
+              - 'my-api-uwu/**'
+      - uses: dorny/paths-filter@v3
         name: Check node changes
         id: node-check
         with:
-          path: my-spa-uwu
+          filters: |
+            src:
+              - 'my-spa-uwu/**'
       - uses: actions/checkout@v3
       - name: Extract metadata (tags, labels) for Docker
         id: meta
