@@ -10,6 +10,7 @@ env:
 
 jobs:
   test-build-and-unit-test:
+    permissions: read-all
     name: Build and Unit Test
     runs-on: ubuntu-latest
     steps:
@@ -94,6 +95,131 @@ jobs:
 
   test-build-docker:
     name: Build docker image
+    permissions: read-all
+    name: Build and Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v3
+        name: Check go changes
+        id: go-check
+        with:
+          filters: |
+            src:
+              - 'my-api-uwu/**'
+      - uses: dorny/paths-filter@v3
+        name: Check node changes
+        id: node-check
+        with:
+          filters: |
+            src:
+              - 'my-spa-uwu/**'
+      - name: Setup Go v1.21
+        uses: actions/setup-go@v4
+        if: steps.go-check.outputs.src == 'true'
+        with:
+          go-version: '1.21.x'
+      - name: Install dependencies
+        if: steps.go-check.outputs.src == 'true'
+        run: go get .
+        working-directory: ./${{ env.IMAGE_API_NAME }}
+      - name: Test Build
+        if: steps.go-check.outputs.src == 'true'
+        run: go build -v .
+        working-directory: ./${{ env.IMAGE_API_NAME }}
+      - name: Run Unit test
+        if: steps.go-check.outputs.src == 'true'
+        run: go test -json > TestResult-1.21.json
+        working-directory: ./${{ env.IMAGE_API_NAME }}
+      - name: Upload Test Result
+        uses: actions/upload-artifact@v4
+        if: steps.go-check.outputs.src == 'true'
+        with:
+          name: ./{{ env/IMAGE_API_NAME }}/Go-results-1.21
+          path: TestResult-1.21.json
+      - name: Setup Node v18
+        uses: actions/setup-node@v4
+        if: steps.node-check.outputs.src == 'true'
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        if: steps.node-check.outputs.src == 'true'
+        run: npm install
+        working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
+      - name: Test Build
+        if: steps.node-check.outputs.src == 'true'
+        run: npm run build --prod
+        working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
+
+  # sonarqube-check:
+  #   name: Sonarqube Scan
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: marceloprado/has-changed-path@v1.0.1
+  #       name: Check go changes
+  #       id: go-check
+  #       with:
+  #         paths: my-api-uwu
+  #       env:
+  #         SOURCE: main
+  #     - uses: marceloprado/has-changed-path@v1.0.1
+  #       name: Check node changes
+  #       id: node-check
+  #       with:
+  #         paths: my-spa-uwu
+  #       env:
+  #         SOURCE: main
+  #     - uses: actions/checkout@v3
+  #     - name: SonarQube Scan
+  #       uses: sonarsource/sonarqube-scan-action@master
+  #       env:
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  #       with:
+  #         projectBaseDir: ${{ env.IMAGE_NAME }}
+
+  test-build-docker:
+    name: Build docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dorny/paths-filter@v3
+        name: Check go changes
+        id: go-check
+        with:
+          filters: |
+            src:
+              - 'my-api-uwu/**'
+      - uses: dorny/paths-filter@v3
+        name: Check node changes
+        id: node-check
+        with:
+          filters: |
+            src:
+              - 'my-spa-uwu/**'
+      - uses: actions/checkout@v3
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}
+          tags: type=semver,pattern={{version}}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./my-api-uwu/Dockerfile
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Security check for the docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:${{ steps.meta.outputs.tags }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
     runs-on: ubuntu-latest
     steps:
       - uses: dorny/paths-filter@v3
