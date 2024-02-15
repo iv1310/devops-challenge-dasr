@@ -3,14 +3,14 @@ FROM node:18-alpine3.16 as dependencies
 
 WORKDIR /app
 
-COPY application/package.json application/package-lock.json ./
+COPY my-spa-uwu/package.json my-spa-uwu/package-lock.json ./
 RUN npm install
 
 
 # Stage 2: Run additional tests or perform other tasks if needed
 FROM dependencies as builder
 
-COPY ./application .
+COPY ./my-spa-uwu .
 RUN sed -i "s|<API_URL>|http://my-api-uwu.detectionserver.site:8080|g" src/app/app.component.ts
 RUN npm run build --prod
 
@@ -22,7 +22,7 @@ COPY --from=builder /app/dist/application/browser /usr/share/nginx/html
 
 # Remove the default Nginx configuration and replace with custom configuration
 RUN rm -rf /etc/nginx/conf.d
-COPY application/nginx.conf /etc/nginx/conf.d/
+COPY my-spa-uwu/nginx.conf /etc/nginx/conf.d/
 
 EXPOSE 80
 

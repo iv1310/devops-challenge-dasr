@@ -4,7 +4,7 @@ FROM golang:1.21-alpine AS dependencies
 WORKDIR /go/src/app
 
 # Copy the Go modules files
-COPY go.mod go.sum ./
+COPY my-api-uwu/go.mod my-api-uwu/go.sum ./
 
 # Download the dependencies
 RUN go mod download
@@ -12,7 +12,7 @@ RUN go mod download
 # Stage 2: Compile the code
 FROM dependencies as builder
 
-COPY main.go .
+COPY my-api-uwu/main.go .
 
 # Build the Go application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/bin/app .
