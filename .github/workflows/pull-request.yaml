@@ -98,7 +98,7 @@ jobs:
         working-directory: ./${{ env.IMAGE_FRONTEND_NAME }}
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9v3
+        uses: docker/metadata-action@v3
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}
           tags: type=semver,pattern={{version}}
