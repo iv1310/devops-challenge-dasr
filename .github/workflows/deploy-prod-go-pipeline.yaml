@@ -39,17 +39,17 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable,${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Set short git commit SHA
-        id: vars
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: Get tag
+        id: gettag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+        with:
+          fallback: 1.0.0-go
       - uses: chrisdickinson/setup-yq@latest
         with:
           yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq eval '.apps.image.tag = "sha-${{ env.COMMIT_SHORT_SHA }}"' -i my-api-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ steps.gettag.outputs.tag }}"' -i my-api-uwu/helm-charts/values-prod.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
