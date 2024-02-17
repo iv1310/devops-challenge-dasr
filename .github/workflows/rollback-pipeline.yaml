@@ -23,13 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: chrisdickinson/setup-yq@latest
+      - name: Replace image tag
+        run: |
+          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "${{ github.event.input.service_version }}")' my-api-uwu/helm-charts/values-prod.yaml
       - name: rollback go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            sed -i "s|<IMAGE_TAG>|${{ github.event.input.service_version }}|g" my-api-uwu/helm-charts/values-prod.yaml
             helm dependency build my-api-uwu/helm-charts
             helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-prod.yaml
 
@@ -40,12 +43,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: chrisdickinson/setup-yq@latest
+      - name: Replace image tag
+        run: |
+          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "${{ github.event.input.service_version }}")' my-spa-uwu/helm-charts/values-prod.yaml
       - name: rollback node app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            sed -i "s|<IMAGE_TAG>|$${{ github.event.input.service_version }}|g" my-spa-uwu/helm-charts/values-prod.yaml
             helm dependency build my-spa-uwu/helm-charts
             helm upgrade --install my-spa-uwu -n prod-my-spa-uwu my-api-uwu/helm-charts -f my-spa-uwu/helm-charts/values.yaml -f my-spa-uwu/helm-charts/values-prod.yaml
