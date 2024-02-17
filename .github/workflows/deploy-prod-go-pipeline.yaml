@@ -56,4 +56,4 @@ jobs:
         with:
           args: |
             helm dependency build my-api-uwu/helm-charts
-            helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-values-prod.yaml
+            helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-prod.yaml
