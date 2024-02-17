@@ -77,7 +77,7 @@ jobs:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            helm dependency build my-api-uwu/helm-chart
+            helm dependency build my-api-uwu/helm-charts
             helm upgrade --install my-api-uwu -n stag-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-stag.yaml
 
   node-pull-request-checks:
