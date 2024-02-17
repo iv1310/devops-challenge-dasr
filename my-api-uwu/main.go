@@ -86,7 +86,7 @@ func main() {
 			log.Printf("Error during server shutdown: %v", err)
 		}
 
-		log.Println("Server gracefully stopped.")
+		log.Println("Server gracefully stopped yuhuuu!!.")
 	}()
 
 	log.Println("API is running on port 8080....")
