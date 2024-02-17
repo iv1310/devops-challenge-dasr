@@ -5,7 +5,7 @@ metadata:
   name: deployer
 rules:
   - apiGroups: ["", "extensions", "apps", "autoscaling","batch", "networking.k8s.io"]
-    resources: ["deployments", "replicasets", "pods", "cronjobs","batch","configmaps", "secrets", "services", "horizontalpodautoscalers", "statefulsets", "ingresses", "namespaces" ]
+    resources: ["deployments", "replicasets", "pods", "cronjobs","batch","configmaps", "secrets","serviceaccounts" ,"services", "horizontalpodautoscalers", "statefulsets", "ingresses", "namespaces" ]
     verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1

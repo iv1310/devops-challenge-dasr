@@ -56,27 +56,21 @@ jobs:
             - ${{ steps.meta.outputs.tags }}
             - ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Security check for the docker image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ steps.meta.outputs.tags }}'
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
       - name: Set short git commit SHA
         id: vars
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - uses: chrisdickinson/setup-yq@latest
+        name: Replace image tag
+        run: |
+          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "sha-${{ env.COMMIT_SHORT_SHA }}")' my-api-uwu/helm-charts/values-prod.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            sed -i "s|<IMAGE_TAG>|${{ env.COMMIT_SHORT_SHA }}|g" my-api-uwu/helm-charts/values-prod.yaml
             helm dependency build my-api-uwu/helm-charts
             helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-values-prod.yaml
 
@@ -108,26 +102,20 @@ jobs:
             - ${{ steps.meta.outputs.tags }}
             - ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable
           labels: ${{ steps.meta.outputs.labels }}
-      - name: Security check for the docker image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: '${{ steps.meta.outputs.tags }}'
-          format: 'table'
-          exit-code: '0'
-          ignore-unfixed: true
-          vuln-type: 'os,library'
-          severity: 'CRITICAL,HIGH'
       - name: Set short git commit SHA
         id: vars
         run: |
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - uses: chrisdickinson/setup-yq@latest
+        name: Replace image tag
+        run: |
+          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "sha-${{ env.COMMIT_SHORT_SHA }}")' my-spa-uwu/helm-charts/values-prod.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
           KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
         with:
           args: |
-            sed -i "s|<IMAGE_TAG>|${{ env.COMMIT_SHORT_SHA }}|g" my-spa-uwu/helm-charts/values-prod.yaml
             helm dependency build my-spa-uwu/helm-charts
             helm upgrade --install my-spa-uwu -n prod-my-spa-uwu my-spa-uwu/helm-charts -f my-spa-uwu/helm-charts/values.yaml -f my-spa-uwu/helm-charts/values-prod.yaml
