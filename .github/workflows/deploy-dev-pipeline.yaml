@@ -68,7 +68,7 @@ jobs:
       - uses: chrisdickinson/setup-yq@latest
       - name: Replace image tag
         run: |
-          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "sha-${{ env.COMMIT_SHORT_SHA }}")' my-api-uwu/helm-charts/values-dev.yaml
+          yq -i '.apps.image.tag = "sha-${{ env.COMMIT_SHORT_SHA }}"' my-api-uwu/helm-charts/values-dev.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:

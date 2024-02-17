@@ -89,7 +89,7 @@ func main() {
 		log.Println("Server gracefully stopped.")
 	}()
 
-	log.Println("API is running on port 8080.....")
+	log.Println("API is running on port 8080......")
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Error starting server: %v", err)
 	}
