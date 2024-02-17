@@ -18,7 +18,7 @@ on:
 
 jobs:
   go-main-pipeline:
-    if: ${{ github.event.input.service_name == 'go-app' }}
+    if: ${{ inputs.service_name == 'go-app' }}
     name: Doing some test on GO App
     runs-on: ubuntu-latest
     steps:
@@ -28,7 +28,7 @@ jobs:
           yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq eval '.apps.image.tag = "${{ github.event.input.service_version }}"' -i my-api-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ inputs.service_version }}"' -i my-api-uwu/helm-charts/values-prod.yaml
       - name: rollback go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
@@ -39,7 +39,7 @@ jobs:
             helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-prod.yaml
 
   node-main-pipeline:
-    if: ${{ github.event.input.service_name == 'node-app' }}
+    if: ${{ inputs.service_name == 'node-app' }}
     name: Doing some test on Node App
     runs-on: ubuntu-latest
     steps:
@@ -49,7 +49,7 @@ jobs:
           yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq eval '.apps.image.tag = "${{ github.event.input.service_version }}"' -i my-spa-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ inputs.service_version }}"' -i my-spa-uwu/helm-charts/values-prod.yaml
       - name: rollback node app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
