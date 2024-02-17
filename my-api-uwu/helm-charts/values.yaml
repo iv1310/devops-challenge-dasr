@@ -29,6 +29,16 @@ apps:
           - path: /
             pathType: ImplementationSpecific
 
+  livenessProbe:
+    httpGet:
+      path: /items
+      port: http
+
+  readinessProbe:
+    httpGet:
+      path: /items
+      port: http
+
   resources:
     limits:
       cpu: 100m
