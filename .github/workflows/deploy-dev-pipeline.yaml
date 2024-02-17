@@ -31,7 +31,7 @@ jobs:
   go-pull-request-checks:
     needs: changes-check
     if: ${{ needs.changes-check.outputs.go == 'true' }}
-    name: Doing some test on GO App
+    name: Deploy go app to Cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -50,8 +50,8 @@ jobs:
           file: ./my-api-uwu/Dockerfile
           push: false
           tags:
-            - ${{ steps.meta.outputs.tags }}
-            - ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable-dev
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable-dev
           labels: ${{ steps.meta.outputs.labels }}
       - name: Security check for the docker image
         uses: aquasecurity/trivy-action@master
@@ -80,7 +80,7 @@ jobs:
   node-pull-request-checks:
     needs: changes-check
     if: ${{ needs.changes-check.outputs.node == 'true' }}
-    name: Doing some test on Node App
+    name: Deploy node app to Cluster
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -92,14 +92,15 @@ jobs:
           tags: |
             type=ref,event=branch
             type=ref,event=pr
-            type=semver,pattern={{version}}
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./my-spa-uwu/Dockerfile
           push: false
-          tags: ${{ steps.meta.outputs.tags }}
+          tags:
+            ${{ steps.meta.outputs.tags }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}:stable-dev
           labels: ${{ steps.meta.outputs.labels }}
       - name: Security check for the docker image
         uses: aquasecurity/trivy-action@master
