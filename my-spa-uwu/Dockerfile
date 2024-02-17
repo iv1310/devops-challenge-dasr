@@ -15,4 +15,4 @@ COPY --from=builder /app /app
 
 WORKDIR /app
 
-CMD ["hello.js"]
+CMD ["app.js"]
