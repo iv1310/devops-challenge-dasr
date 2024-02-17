@@ -26,7 +26,7 @@ For the architecture, I employ a Kubernetes cluster comprising two master nodes 
 ![Alt architecture](./assets/infra-architecture.webp "Kubernetes Architecture")
 
 ## Pipeline phase
-I implement GitHub Actions for a streamlined CI/CD approach, organized into three essential pipelines. The pull request pipeline provides swift feedback for developers, ensuring quick insights into the impact of their changes. The main branch pipeline focuses on deploying a resilient application to production, while a dedicated rollback pipeline efficiently addresses unforeseen issues. The use of filters optimizes the process by triggering changes only when modifications occur in specific directories or services, enhancing precision and resource efficiency throughout the CI/CD lifecycle.
+I implement GitHub Actions for a streamlined CI/CD approach, organized into three essential pipelines. The pull request pipeline provides swift feedback for developers, ensuring quick insights into the impact of their changes. The main branch pipeline focuses on deploying a resilient application to production, while a dedicated rollback pipeline efficiently addresses unforeseen issues. The use of filters optimizes the process by triggering changes only when modifications occur in specific directories or services, enhancing precision and resource efficiency throughout the CI/CD lifecycle. Also we need to protect the main branch to only get new changes from Pull Request, and will reject a direct commit.
 1. Main branch pipeline.
 * Purpose: End-to-end deployment of the application to production.
 * Steps:
@@ -66,6 +66,8 @@ The deployment process follows a structured workflow designed to ensure consiste
     ![Alt stg-image](./assets/stg-api.png "My Api Uwu on Stg Environment")
     * My Api Uwu on Prod Environment
     ![Alt prod-image](./assets/prod-api.png "My Api Uwu on Prod Environment")
+    * My Api Uwu on Prod Environment - Rollback
+    ![Alt prod-image-rollback](./assets/prod-api-rollback.png "My Api Uwu on Prod Environment - Rollback")
 
 ## Rollback and versioning
 The version is automatically generated based on the commit SHA short for each change in the main branch but in prod use git tag with semver. Rollback can be manually triggered, requiring the definition of a variable for specifying the rollback version.
