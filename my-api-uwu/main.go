@@ -23,10 +23,10 @@ func getItems(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Request from: %s, Endpoint: %s %s", r.RemoteAddr, r.Method, r.URL.Path)
 
 	items := []Item{
-		{ID: 1, Name: "Item 1"},
-		{ID: 2, Name: "Item 2"},
-		{ID: 3, Name: "Item 3"},
-		{ID: 4, Name: "Item 4"},
+		{ID: 1, Name: "Item 1 - prod!!!!!!"},
+		{ID: 2, Name: "Item 2 - prod!!!!!!"},
+		{ID: 3, Name: "Item 3 PROD Nih!!!!!!"},
+		{ID: 4, Name: "Item 4 PROD Nih!!!!!!"},
 	}
 	envTier := os.Getenv("ENV_TIER")
 	if envTier == "dev" {
