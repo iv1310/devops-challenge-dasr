@@ -1,0 +1,51 @@
+name: "Pipeline to Rollback: Prod Env"
+on:
+  workflow_dispatch:
+    branches:
+      - main
+    input:
+      service_name:
+        description: "Which service to rollback"
+        require: true
+        default: "go-app"
+        type: choice
+        options:
+        - "go-app"
+        - "node-app"
+      service_version:
+        description: "Service version"
+        required: true
+
+jobs:
+  go-pull-request-checks:
+    if: ${{ github.event.input.service_name == 'go-app' }}
+    name: Doing some test on GO App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: rollback go app to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            sed -i "s|<IMAGE_TAG>|${{ github.event.input.service_version }}|g" my-api-uwu/helm-charts/values-prod.yaml
+            helm dependency build my-api-uwu/helm-charts
+            helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-prod.yaml
+
+  node-pull-request-checks:
+    needs: changes-check
+    if: ${{ github.event.input.service_name == 'node-app' }}
+    name: Doing some test on Node App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: rollback node app to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            sed -i "s|<IMAGE_TAG>|$${{ github.event.input.service_version }}|g" my-spa-uwu/helm-charts/values-prod.yaml
+            helm dependency build my-spa-uwu/helm-charts
+            helm upgrade --install my-spa-uwu -n prod-my-spa-uwu my-api-uwu/helm-charts -f my-spa-uwu/helm-charts/values.yaml -f my-spa-uwu/helm-charts/values-prod.yaml

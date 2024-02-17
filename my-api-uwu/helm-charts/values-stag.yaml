@@ -1,0 +1,31 @@
+---
+apps:
+  replicaCount: 2
+
+  image:
+    tag: "<IMAGE_TAG>"
+
+  prefixName: "stag"
+
+  ingress:
+    enabled: true
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: my-api-uwu.detectionserver.site
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+
+  resources:
+    limits:
+      cpu: 150m
+      memory: 256Mi
+
+  autoscaling:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 3
+    targetCPUUtilizationPercentage: 80

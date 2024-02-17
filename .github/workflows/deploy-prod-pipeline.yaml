@@ -1,0 +1,127 @@
+name: "Pipeline to deploy: Prod Env"
+on:
+  push:
+    tags:
+      - "v*.*.*" # v1.x.x
+
+env:
+  REGISTRY: ghcr.io/iv1310
+  IMAGE_API_NAME: my-api-uwu
+  IMAGE_FRONTEND_NAME: my-spa-uwu
+
+jobs:
+  changes-check:
+    permissions: read-all
+    name: Check code changes
+    runs-on: ubuntu-latest
+    outputs:
+      go: ${{ steps.code-check.outputs.go }}
+      node: ${{ steps.code-check.outputs.node }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v3
+        id: code-check
+        with:
+          filters: |
+            node:
+              - "my-spa-uwu/**"
+            go:
+              - "my-api-uwu/**"
+
+  go-pull-request-checks:
+    needs: changes-check
+    if: ${{ needs.changes-check.outputs.go == 'true' }}
+    name: Doing some test on GO App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}
+          tags: |
+            type=ref,event=pr
+            type=sha
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./my-api-uwu/Dockerfile
+          push: false
+          tags:
+            - ${{ steps.meta.outputs.tags }}
+            - ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Security check for the docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ steps.meta.outputs.tags }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: deploy go app to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            sed -i "s|<IMAGE_TAG>|${{ env.COMMIT_SHORT_SHA }}|g" my-api-uwu/helm-charts/values-prod.yaml
+            helm dependency build my-api-uwu/helm-charts
+            helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-values-prod.yaml
+
+  node-pull-request-checks:
+    needs: changes-check
+    if: ${{ needs.changes-check.outputs.node == 'true' }}
+    name: Doing some test on Node App
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./my-spa-uwu/Dockerfile
+          push: false
+          tags:
+            - ${{ steps.meta.outputs.tags }}
+            - ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Security check for the docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ steps.meta.outputs.tags }}'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - name: deploy go app to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            sed -i "s|<IMAGE_TAG>|${{ env.COMMIT_SHORT_SHA }}|g" my-spa-uwu/helm-charts/values-prod.yaml
+            helm dependency build my-spa-uwu/helm-charts
+            helm upgrade --install my-spa-uwu -n prod-my-spa-uwu my-spa-uwu/helm-charts -f my-spa-uwu/helm-charts/values.yaml -f my-spa-uwu/helm-charts/values-prod.yaml
