@@ -47,7 +47,7 @@ jobs:
       - name: Set envar
         run: |
           newTag=$(echo "${{ steps.gettag.outputs.tag }}" | sed 's/^v//')
-          echo "NEW_TAG=$newTag" >> $COMMIT_ENV
+          echo "NEW_TAG=$newTag" >> $GITHUB_ENV
       - uses: chrisdickinson/setup-yq@latest
         with:
           yq-version: v4.40.5
