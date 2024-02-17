@@ -24,9 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "${{ github.event.input.service_version }}")' my-api-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ github.event.input.service_version }}"' -i my-api-uwu/helm-charts/values-prod.yaml
       - name: rollback go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
@@ -44,9 +46,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "${{ github.event.input.service_version }}")' my-spa-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ github.event.input.service_version }}"' -i my-spa-uwu/helm-charts/values-prod.yaml
       - name: rollback node app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:

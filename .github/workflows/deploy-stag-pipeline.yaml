@@ -3,7 +3,6 @@ on:
   workflow_dispatch:
     branches:
       - main
-      - add-code
 
 env:
   REGISTRY: ghcr.io/iv1310
@@ -67,9 +66,11 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "sha-${{ env.COMMIT_SHORT_SHA }}")' my-api-uwu/helm-charts/values-stag.yaml
+          yq eval '.apps.image.tag = "sha-${{ env.COMMIT_SHORT_SHA }}"' -i my-api-uwu/helm-charts/values-stag.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
@@ -117,9 +118,11 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq -i '.apps.image.tag |= sub("<IMAGE_TAG>", "sha-${{ env.COMMIT_SHORT_SHA }}")' my-spa-uwu/helm-charts/values-stag.yaml
+          yq eval '.apps.image.tag = "sha-${{ env.COMMIT_SHORT_SHA }}"' -i my-spa-uwu/helm-charts/values-stag.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
