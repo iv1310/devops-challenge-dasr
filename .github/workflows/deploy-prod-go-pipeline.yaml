@@ -44,12 +44,16 @@ jobs:
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
         with:
           fallback: 1.0.0-go
+      - name: Set envar
+        run: |
+          newTag=$(echo "${{ steps.gettag.outputs.tag }}" | sed 's/^v//')
+          echo "NEW_TAG=$newTag" >> $COMMIT_ENV
       - uses: chrisdickinson/setup-yq@latest
         with:
           yq-version: v4.40.5
       - name: Replace image tag
         run: |
-          yq eval '.apps.image.tag = "${{ steps.gettag.outputs.tag }}"' -i my-api-uwu/helm-charts/values-prod.yaml
+          yq eval '.apps.image.tag = "${{ env.NEW_TAG }}"' -i my-api-uwu/helm-charts/values-prod.yaml
       - name: deploy go app to cluster
         uses: wahyd4/kubectl-helm-action@master
         env:
