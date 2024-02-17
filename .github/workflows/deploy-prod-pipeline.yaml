@@ -28,7 +28,7 @@ jobs:
             go:
               - "my-api-uwu/**"
 
-  go-pull-request-checks:
+  go-main-pipeline:
     needs: changes-check
     if: ${{ needs.changes-check.outputs.go == 'true' }}
     name: Doing some test on GO App
@@ -73,7 +73,7 @@ jobs:
             helm dependency build my-api-uwu/helm-charts
             helm upgrade --install my-api-uwu -n prod-my-api-uwu my-api-uwu/helm-charts -f my-api-uwu/helm-charts/values.yaml -f my-api-uwu/helm-charts/values-values-prod.yaml
 
-  node-pull-request-checks:
+  node-main-pipeline:
     needs: changes-check
     if: ${{ needs.changes-check.outputs.node == 'true' }}
     name: Doing some test on Node App
