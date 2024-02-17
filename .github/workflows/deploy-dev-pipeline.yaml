@@ -66,6 +66,8 @@ jobs:
           calculatedSha=$(git rev-parse --short ${{ github.sha }})
           echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
       - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: 4.40.5
       - name: Replace image tag
         run: |
           yq --help
