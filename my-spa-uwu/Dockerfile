@@ -3,7 +3,7 @@ FROM node:18-alpine3.16 as builder
 
 WORKDIR /app
 
-COPY my-spa-uwu/package*.json ./
+COPY my-spa-uwu/* ./
 
 RUN npm install
 
