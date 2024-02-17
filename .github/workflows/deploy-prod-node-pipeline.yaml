@@ -1,0 +1,53 @@
+name: "Pipeline to deploy: Prod Env"
+on:
+  push:
+    tags:
+      - "nodeapp-v*.*.*" # nodeapp-v1.x.x
+
+env:
+  REGISTRY: ghcr.io/iv1310
+  IMAGE_FRONTEND_NAME: my-spa-uwu
+
+jobs:
+  node-main-pipeline:
+    name: Doing some test on Node App
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}
+          tags: |
+            type=semver,pattern={{version}}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./my-spa-uwu/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}:stable
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Set short git commit SHA
+        id: vars
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "COMMIT_SHORT_SHA=$calculatedSha" >> $GITHUB_ENV
+      - uses: chrisdickinson/setup-yq@latest
+        with:
+          yq-version: v4.40.5
+      - name: Replace image tag
+        run: |
+          yq eval '.apps.image.tag = "sha-${{ env.COMMIT_SHORT_SHA }}"' -i my-spa-uwu/helm-charts/values-prod.yaml
+      - name: Deploy node app to cluster
+        uses: wahyd4/kubectl-helm-action@master
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        with:
+          args: |
+            helm dependency build my-spa-uwu/helm-charts
+            helm upgrade --install my-spa-uwu -n prod-my-spa-uwu my-spa-uwu/helm-charts -f my-spa-uwu/helm-charts/values.yaml -f my-spa-uwu/helm-charts/values-prod.yaml
