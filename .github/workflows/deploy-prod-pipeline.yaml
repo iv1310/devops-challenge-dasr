@@ -50,7 +50,7 @@ jobs:
         with:
           context: .
           file: ./my-api-uwu/Dockerfile
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}, ${{ env.REGISTRY }}/${{ env.IMAGE_API_NAME }}:stable
           labels: ${{ steps.meta.outputs.labels }}
       - name: Set short git commit SHA
@@ -95,7 +95,7 @@ jobs:
         with:
           context: .
           file: ./my-spa-uwu/Dockerfile
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_FRONTEND_NAME }}:stable
           labels: ${{ steps.meta.outputs.labels }}
       - name: Set short git commit SHA
