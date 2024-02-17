@@ -15,6 +15,8 @@ apps:
       cpu: 100m
       memory: 128Mi
 
+  ingress:
+    enabled: true
     hosts:
       - host: my-api-uwu-dev.detectionserver.site
         paths:
@@ -29,4 +31,5 @@ apps:
     - name: ENV_ITEM_4
       value: Uwu-item4-dev
 
-  nodeSelector: kubernetes.io/type=node-worker
+  nodeSelector:
+    kubernetes.io/type: node-worker
