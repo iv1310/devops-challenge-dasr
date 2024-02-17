@@ -7,11 +7,6 @@ apps:
 
   prefixName: "prod"
 
-  service:
-    type: ClusterIP
-    port: 80
-    targetPort: 8080
-
   ingress:
     enabled: true
     annotations: {}
@@ -30,6 +25,14 @@ apps:
     requests:
       cpu: 150m
       memory: 128Mi
+
+  extraEnv:
+    - name: ENV_TIER
+      value: prod
+    - name: ENV_ITEM_3
+      value: Uwu-item3-prod
+    - name: ENV_ITEM_4
+      value: Uwu-item4-prod
 
   autoscaling:
     enabled: true
