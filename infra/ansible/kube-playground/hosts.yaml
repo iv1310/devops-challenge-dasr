@@ -1,0 +1,36 @@
+all:
+  hosts:
+    kube-pg-master01:
+      ip: 192.168.100.33
+      access_ip: 192.168.100.33
+    kube-pg-master02:
+      ip: 192.168.100.114
+      access_ip: 192.168.100.114
+    kube-pg-node01:
+      ip: 192.168.100.161
+      access_ip: 192.168.100.161
+    kube-pg-node02:
+      ip: 192.168.100.132
+      access_ip: 192.168.100.132
+  children:
+    kube_control_plane:
+      hosts:
+        kube-pg-master01:
+        kube-pg-master02:
+    kube_node:
+      hosts:
+        kube-pg-master01:
+        kube-pg-master02:
+        kube-pg-node01:
+        kube-pg-node02:
+    etcd:
+      hosts:
+        kube-pg-master01:
+        kube-pg-master02:
+        kube-pg-node01:
+    k8s_cluster:
+      children:
+        kube_control_plane:
+        kube_node:
+    calico_rr:
+      hosts: {}
