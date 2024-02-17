@@ -7,11 +7,6 @@ apps:
 
   prefixName: "dev"
 
-  service:
-    type: ClusterIP
-    port: 80
-    targetPort: 8080
-
   resources:
     limits:
       cpu: 100m

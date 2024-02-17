@@ -14,7 +14,7 @@ apps:
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     hosts:
-      - host: my-api-uwu.detectionserver.site
+      - host: my-spa-uwu-stg.detectionserver.site
         paths:
           - path: /
             pathType: ImplementationSpecific
